@@ -6,4 +6,7 @@ const router = express.Router()
 router.route('/')
   .get(categoryController.index)
 
+router.route('/:id/restaurants')
+  .get(categoryController.restaurants)
+
 export default router
