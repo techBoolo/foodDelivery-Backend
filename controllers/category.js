@@ -1,20 +1,13 @@
-import { getDB } from '../config/db.js'
+import Category from '../models/category_dao.js'
 
 const index = async (req, res) => {
-  const db = getDB()
-  const categories = await db.category.findMany({})
+  const categories = await Category.getCategories()
   res.status(200).json(categories)
 }
 
 const restaurants = async (req, res) => {
-  const db = getDB()
   const { id } = req.params
-  const result = await db.category.findMany({
-    where: {
-      id: Number(id)
-    },
-    include: { restaurants: true }
-  })
+  const result = await Category.getRestaurants(id)
   res.status(200).json(result)
 }
 
