@@ -6,13 +6,118 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Category {
-  id Int @id @default(autoincrement())
-  name String @unique
-  icon String
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  icon        String
+  restaurants Restaurant[]
+
+  @@map("categories")
+}
+
+model Courier {
+  id     Int     @id @default(autoincrement())
+  name   String
+  photo  String
+  phone  String
+  orders Order[]
+
+  @@map("couriers")
+}
+
+model Customer {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String
+  phone    String
+  image    String?
+  password String
+  orders   Order[]
+
+  @@map("customers")
+}
+
+model Menu {
+  id          Int          @id @default(autoincrement())
+  name        String
+  image       String
+  description String
+  price       Float
+  restaurants Restaurant[]
+  orders      Order[]
+
+  @@map("menus")
+}
+
+enum PriceRating {
+  A
+  B
+  C
+}
+
+model Location {
+  id      Int      @id @default(autoincrement())
+  lat     Float
+  lng     Float
+  address Address?
+
+  @@unique([lat, lng])
+  @@map("locations")
+}
+
+model Address {
+  id           Int        @id @default(autoincrement())
+  street       String
+  number       Int?
+  city         String
+  locationId   Int        @unique
+  location     Location   @relation(fields: [locationId], references: [id])
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("addresses")
+}
+
+model Restaurant {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  rating      Float?
+  address     Address[]
+  categories  Category[]
+  priceRating PriceRating?
+  logo        String?
+  menus       Menu[]
+  orders      Order[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("restaurants")
+}
+
+enum Status {
+  PENDING
+  CANCELED
+  DELEVERED
+}
+
+model Order {
+  id           Int        @id @default(autoincrement())
+  customerId   Int
+  curtomer     Customer   @relation(fields: [customerId], references: [id])
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  menu         Menu[]
+  price        Float
+  courierId    Int
+  courier      Courier    @relation(fields: [courierId], references: [id])
+  status       Status     @default(PENDING)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("orders")
 }
